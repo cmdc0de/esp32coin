@@ -1,0 +1,6 @@
+[submodule "firmware/components/libesp"]
+	path = firmware/components/libesp
+	url = https://github.com/cmdc0de/libesp
+[submodule "firmware/components/esp-etl/etl"]
+	path = firmware/components/esp-etl/etl
+	url = https://github.com/cmdc0de/etl
