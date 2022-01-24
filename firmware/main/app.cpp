@@ -16,6 +16,8 @@
 #include "freertos.h"
 #include "fatfsvfs.h"
 #include "pinconfig.h"
+#include "etl/vector.h"
+#include "net/wifi.h"
 
 using libesp::ErrorType;
 using libesp::System;
@@ -50,10 +52,28 @@ MyApp::~MyApp() {
 static RGBB leds[14];
 static size_t NumLEDs = sizeof(leds)/sizeof(leds[0]);
 libesp::APA102c LedControl;
+#define TEST_CODE
 
 libesp::ErrorType MyApp::onInit() {
 	ErrorType et;
 	ESP_LOGI(LOGTAG,"OnInit: Free: %u, Min %u", System::get().getFreeHeapSize(),System::get().getMinimumFreeHeapSize());
+
+#ifdef TEST_CODE
+  libesp::WiFi wifi;
+  et = wifi.init(WIFI_MODE_STA);
+  if(et.ok()) {
+    etl::vector<libesp::WiFiAPRecord,16> results;
+    wifi_scan_config_t conf;
+    memset(&conf,0,sizeof(conf));
+    conf.show_hidden = true;
+    conf.scan_type = WIFI_SCAN_TYPE_PASSIVE; //WIFI_SCAN_TYPE_ACTIVE
+    et = wifi.scan(results, conf);
+    etl::vector<libesp::WiFiAPRecord,16>::iterator it;
+    for(it=results.begin();it!=results.end();++it) {
+      ESP_LOGI(LOGTAG,"%s", (*it).toString().c_str());
+    }
+  }
+#else
 
   et = APA102c::initAPA102c(PIN_NUM_LEDS_MOSI, PIN_NUM_lEDS_CLK, VSPI_HOST, 1);
   if(!et.ok()) {
@@ -80,14 +100,14 @@ libesp::ErrorType MyApp::onInit() {
   }
 
 	
-
+#endif
 	return et;
 }
 
 static bool Down = true;
 
 ErrorType MyApp::onRun() {
-#if 0
+#ifdef TEST_CODE
 		  return ErrorType();
 #else
   ErrorType et;
